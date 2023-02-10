@@ -1,9 +1,19 @@
 pipeline {
-    agent any 
+    agent any
+    parameters { choice(name: 'ENVIRONMENT', choices: ['https://en.wikipedia.org/wiki/CI/CD', 'https://www.google.com/', 'https://www.this-url-does-not-exist-and-will-never.com/'], description: 'Select the environment to smoke test') }
     stages {
-        stage('Stage 1') {
+        stage('Simple curl Smoke Test') {
             steps {
-                echo 'Hello world!' 
+                script {
+                    def response = httpRequest "${params.ENVIRONMENT}"
+
+                    if (response.content.contains("continuous integration")) {
+                        print "PASS - Pattern found"
+                    } else {
+                        error "FAIL - Pattern not found"
+                    }
+                
+                }
             }
         }
     }
